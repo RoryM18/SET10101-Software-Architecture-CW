@@ -33,7 +33,7 @@ items = ("Screws", 20, 3.99, 0.5, 0.10)
 de_store_insert = """INSERT INTO StoreTable(itemName, stock, price, saleOffer, loyaltyCardOffer)
                      VALUES(?,?,?,?,?)"""
 
-cur.execute(de_store_insert, items)
+#cur.execute(de_store_insert, items)
 
 print("Items inserted into database")
 
@@ -58,10 +58,23 @@ serverSocket.bind(serverAddress)
 serverSocket.listen(1)
 print("Server is listneing on {}:{}".format(*serverAddress))
 
-while True:
-    #Wait for connection
+def changePrice(itemName, newPrice):
+    try:
+        #Execute an SQL update statement to change the items price
+        updateQuery = f"UPDATE storeTable SET price = '{newPrice}' WHERE itemName = '{itemName}'"
+        conn = sqlite3.connect("DE_Store.db")
+        cur = conn.cursor()
+        cur.execute(updateQuery)
+        conn.commit()
+        conn.close()
+        return "Price updated successfully."
+    except sqlite3.Error as error:
+        return f"Error updating price: {error}"
 
-    print("Waiting for a connection...")
+while True:
+
+    print("Waiting for connection...")
+
     clientSocket, clientAddress = serverSocket.accept()
     print("Accepted connection from {}:{}".format(*clientAddress))
 
@@ -69,18 +82,24 @@ while True:
     try:
         data = clientSocket.recv(1024)
         if not data:
-            print("Client closed connection...")
-            break #Exit loop when client closes connection
-        print("Recieved: {}".format(data.decode('utf-8')))
-        clientSocket.send(data) #echod data back to client
+            print("Client closed connection.")
+            clientSocket.close() #Close the client socket, not the server socket
+
+        #Process the client request to change the price
+
+        requestData = data.decode('utf-8').split(',')
+        if len(requestData) == 2:
+            itemName, newPrice = requestData
+            response = changePrice(itemName, newPrice)
+        else:
+            response = "Invalid request form."
+
+        #Send the response back to the client
+
+        clientSocket.send(response.encode('utf-8'))
     except ConnectionResetError:
-        print("Client closed connection unexpectadley")
-        break
+        print("Client closed connection unexpectedly")
 
-#Clean up client socket
+    #Clean up client socket
 
-clientSocket.close()
-
-#Clean up server socket
-
-serverSocket.close()        
+    clientSocket.close()    
