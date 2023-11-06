@@ -1,5 +1,6 @@
 import socket
 import sqlite3
+import time
 
 #Create SQLite database connection
 
@@ -71,6 +72,20 @@ def changePrice(itemName, newPrice):
     except sqlite3.Error as error:
         return f"Error updating price: {error}"
 
+def changeSale(itemName, newSale):
+    try:
+        #Execute an SQL update statment to change the items sale price
+        updateQuery = f"UPDATE storeTable SET saleOffer = '{newSale}' WHERE itemName = '{itemName}'"
+        conn = sqlite3.connect("DE_Store.db")
+        cur = conn.cursor()
+        cur.execute(updateQuery)
+        conn.commit()
+        conn.close()
+        return "Sale offer updated successfully."
+    except sqlite3.Error as error:
+        return f"Error updating sale offer: {error}"
+
+
 while True:
 
     print("Waiting for connection...")
@@ -85,12 +100,16 @@ while True:
             print("Client closed connection.")
             clientSocket.close() #Close the client socket, not the server socket
 
-        #Process the client request to change the price
-
+         # Process the client request
         requestData = data.decode('utf-8').split(',')
-        if len(requestData) == 2:
-            itemName, newPrice = requestData
-            response = changePrice(itemName, newPrice)
+        if len(requestData) == 3:
+            requestType, itemName, newValue = requestData
+            if requestType == "price":
+                response = changePrice(itemName, newValue)
+            elif requestType == "sale":
+                response = changeSale(itemName, newValue)
+            else:
+                response = "Invalid request type."
         else:
             response = "Invalid request form."
 
@@ -99,8 +118,7 @@ while True:
         clientSocket.send(response.encode('utf-8'))
     except ConnectionResetError:
         print("Client closed connection unexpectedly")
+        #Clean up client socket
+        clientSocket.close()   
         break
-
-    #Clean up client socket
-
-    clientSocket.close()    
+         
