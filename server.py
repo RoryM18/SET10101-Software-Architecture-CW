@@ -99,6 +99,7 @@ while True:
         clientSocket.send(response.encode('utf-8'))
     except ConnectionResetError:
         print("Client closed connection unexpectedly")
+        break
 
     #Clean up client socket
 
