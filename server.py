@@ -85,6 +85,18 @@ def changeSale(itemName, newSale):
         return "Sale offer updated successfully."
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
+    
+def processOrder(itemName, quantity):
+    try:
+        updateQuery = f"UPDATE StoreTable SET stock = stock + {quantity} WHERE itemName = '{itemName}'"
+        conn = sqlite3.connect("DE_Store.db")
+        cur = conn.cursor()
+        cur.execute(updateQuery)
+        conn.commit()
+        conn.close()
+        return f"Ordered {quantity} {itemName} successfully."
+    except sqlite3.Error as error:
+        return f"Error processing order: {error}"
 
 print("Waiting for connection...")
 clientSocket, clientAddress = serverSocket.accept()
@@ -108,8 +120,8 @@ while True:
                 response = changePrice(itemName, newValue)
             elif requestType == "sale":
                 response = changeSale(itemName, newValue)
-            else:
-                response = "Invalid request type."
+            elif requestType == "order":
+                response = processOrder(itemName, newValue)
         else:
             response = "Invalid request form"
 

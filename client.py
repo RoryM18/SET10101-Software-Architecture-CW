@@ -80,11 +80,36 @@ def openPriceControlWindow():
     resultLabel.pack()
 
 def openInventoryControlWindow():
+    
+    global resultLabel
 
-    priceControlWindow = Toplevel(clientWindow)
-    priceControlWindow.title("Price Control")
-    priceControlWindow.geometry("500x500")
+    inventroyControlWindow = Toplevel(clientWindow)
+    inventroyControlWindow.title("Inventory Control")
+    inventroyControlWindow.geometry("500x500")
 
+    itemNameOrderLabel = Label(inventroyControlWindow, text="Item Name:")
+    itemNameOrderLabel.pack()
+
+    itemNameOrderEntry = Entry(inventroyControlWindow)
+    itemNameOrderEntry.pack()
+
+    quantityLabel = Label(inventroyControlWindow, text="Item Amount To Order:")
+    quantityLabel.pack()
+
+    quantityEntry = Entry(inventroyControlWindow)
+    quantityEntry.pack()
+
+    def orderOutOfStockItems():
+        itemName = itemNameOrderEntry.get()
+        quantity = quantityEntry.get()
+        requestData = f"order,{itemName},{quantity}"
+        clientSocket.send(requestData.encode('utf-8'))
+
+    orderBtn = Button(inventroyControlWindow, text = "Order Stock", command = orderOutOfStockItems)
+    orderBtn.pack()
+
+    resultLabel = Label(inventroyControlWindow, text="")
+    resultLabel.pack()
 
 def displayTableData():
 
