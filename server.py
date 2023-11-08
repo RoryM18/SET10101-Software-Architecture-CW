@@ -1,6 +1,6 @@
 import socket
 import sqlite3
-import time
+import json
 
 #Create SQLite database connection
 
@@ -59,6 +59,7 @@ serverSocket.bind(serverAddress)
 serverSocket.listen(1)
 print("Server is listneing on {}:{}".format(*serverAddress))
 
+
 def changePrice(itemName, newPrice):
     try:
         #Execute an SQL update statement to change the items price
@@ -85,22 +86,21 @@ def changeSale(itemName, newSale):
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
 
+print("Waiting for connection...")
+clientSocket, clientAddress = serverSocket.accept()
+print("Accepted connection from {}:{}".format(*clientAddress))
 
 while True:
 
-    print("Waiting for connection...")
-
-    clientSocket, clientAddress = serverSocket.accept()
-    print("Accepted connection from {}:{}".format(*clientAddress))
-
-    #Recieve and echo back data
+    # Receive and process data
     try:
         data = clientSocket.recv(1024)
         if not data:
             print("Client closed connection.")
-            clientSocket.close() #Close the client socket, not the server socket
+            clientSocket.close()
+            break
 
-         # Process the client request
+        # Process the client request
         requestData = data.decode('utf-8').split(',')
         if len(requestData) == 3:
             requestType, itemName, newValue = requestData
@@ -111,14 +111,11 @@ while True:
             else:
                 response = "Invalid request type."
         else:
-            response = "Invalid request form."
+            response = "Invalid request form"
 
-        #Send the response back to the client
-
+        # Send the response back to the client
         clientSocket.send(response.encode('utf-8'))
     except ConnectionResetError:
         print("Client closed connection unexpectedly")
-        #Clean up client socket
-        clientSocket.close()   
+        # Clean up client socket
         break
-         

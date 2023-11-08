@@ -1,13 +1,15 @@
 import socket
 from tkinter import *
+from tkinter import ttk
 import threading
 import time
+import sqlite3
 
 def connectToServer():
     while True:
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = ('192.168.0.183', 12345)  # Replace with your server's IP address
+            server_address = ('192.168.0.130', 12345)  # Replace with your server's IP address
             server_socket.connect(server_address)
             print("Connected to the server")
             return server_socket
@@ -15,6 +17,7 @@ def connectToServer():
             print("Connection refused. Retrying in 5 seconds...")
             time.sleep(5)
 
+clientSocket = connectToServer()
 
 def closeClient():
     clientWindow.destroy() # Close the client window
@@ -26,6 +29,8 @@ clientWindow = Tk()
 clientWindow.title("Client")
 
 clientWindow.geometry("500x500")
+
+resultLabel = None
 
 def openPriceControlWindow():
 
@@ -74,9 +79,44 @@ def openPriceControlWindow():
     resultLabel = Label(priceControlWindow, text="")
     resultLabel.pack()
 
-clientSocket = connectToServer()
+def openInventoryControlWindow():
+
+    priceControlWindow = Toplevel(clientWindow)
+    priceControlWindow.title("Price Control")
+    priceControlWindow.geometry("500x500")
+
+
+def displayTableData():
+
+    conn = sqlite3.connect('De_Store.db')  
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM StoreTable")  
+    data = cur.fetchall()    
+    dataDisplayWindow = Toplevel(clientWindow)
+    dataDisplayWindow.title("Database Data")
+    dataDisplayWindow.geometry("1500x400")
+    
+    tree = ttk.Treeview(dataDisplayWindow, columns=("ID", "Item Name", "Stock", "Price", "Sale Offer", "Loyalty Card Iffer"))
+    tree.heading("#1", text="ID")
+    tree.heading("#2", text="Item Name")
+    tree.heading("#3", text="Stock")
+    tree.heading("#4", text="Price")
+    tree.heading("#5", text="Sale Offer")
+    tree.heading("#6", text="Loyalty Card Offer")
+    
+    tree.pack()
+
+    for row in data:
+        tree.insert("", "end", values=row)
+
+
+databaseBtn = Button(clientWindow, text = "View Database", command = displayTableData)
+databaseBtn.pack(pady=10)
 
 priceControlBtn = Button(clientWindow, text = "Open Price Control", command = openPriceControlWindow)
+priceControlBtn.pack(pady=10)
+
+priceControlBtn = Button(clientWindow, text = "Open Inventory Control", command = openInventoryControlWindow)
 priceControlBtn.pack(pady=10)
 
 closeBtn = Button(clientWindow, text="Close", command=closeClient)
