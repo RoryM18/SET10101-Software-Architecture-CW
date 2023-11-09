@@ -1,6 +1,7 @@
 import socket
 from tkinter import *
 from tkinter import ttk
+import tkinter.messagebox
 import threading
 import time
 import sqlite3
@@ -80,7 +81,7 @@ def openPriceControlWindow():
     resultLabel.pack()
 
 def openInventoryControlWindow():
-    
+
     global resultLabel
 
     inventroyControlWindow = Toplevel(clientWindow)
@@ -110,6 +111,8 @@ def openInventoryControlWindow():
 
     resultLabel = Label(inventroyControlWindow, text="")
     resultLabel.pack()
+
+
 
 def displayTableData():
 

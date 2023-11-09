@@ -97,6 +97,27 @@ def processOrder(itemName, quantity):
         return f"Ordered {quantity} {itemName} successfully."
     except sqlite3.Error as error:
         return f"Error processing order: {error}"
+    
+def warningMessage():
+    try:
+        conn = sqlite3.connect("DE_Store.db")
+        cur = conn.cursor()
+        
+        # Select item names with stock levels less than 10
+        cur.execute("SELECT itemName FROM StoreTable WHERE stock < 10")
+        
+        # Fetch all the results
+        low_stock_items = cur.fetchall()
+        
+        if low_stock_items:
+            # If there are items with low stock, create a warning message
+            items_list = ', '.join(item[0] for item in low_stock_items)
+            return f"Order more of the following items: {items_list}"
+        else:
+            return "No items with low stock."
+    except sqlite3.Error as error:
+        return f"Error generating warning message: {error}"
+    
 
 print("Waiting for connection...")
 clientSocket, clientAddress = serverSocket.accept()
@@ -131,3 +152,5 @@ while True:
         print("Client closed connection unexpectedly")
         # Clean up client socket
         break
+
+   
