@@ -10,7 +10,7 @@ def connectToServer():
     while True:
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = ('192.168.0.130', 12345)  # Replace with your server's IP address
+            server_address = ('192.168.0.14', 12345)  # Replace with your server's IP address
             server_socket.connect(server_address)
             print("Connected to the server")
             return server_socket
@@ -112,7 +112,47 @@ def openInventoryControlWindow():
     resultLabel = Label(inventroyControlWindow, text="")
     resultLabel.pack()
 
+    def displayWarningMessage():
+        requestData = "warning"
+        response = clientSocket.send(requestData.encode('utf-8'))
+        if response:
+            tkinter.messagebox.showinfo("Warning Message", response)
 
+    warningBtn = Button(inventroyControlWindow, text="Show Warning Message", command=displayWarningMessage)
+    warningBtn.pack(pady=10)
+
+
+def openLoyaltyCardControlWindow():
+
+    global resultLabel
+
+    loyaltyCardControlWindow = Toplevel(clientWindow)
+    loyaltyCardControlWindow.title("Loyalty Card Control")
+    loyaltyCardControlWindow.geometry("500x500")
+
+    itemNameLoyaltyCardLabel = Label(loyaltyCardControlWindow, text="Item Name:")
+    itemNameLoyaltyCardLabel.pack()
+
+    itemNameLoyaltyCardEntry = Entry(loyaltyCardControlWindow)
+    itemNameLoyaltyCardEntry.pack()
+
+    newLoyaltyCardSaleLabel = Label(loyaltyCardControlWindow, text="New Loyalty Card Sale:")
+    newLoyaltyCardSaleLabel.pack()
+
+    newLoyaltyCardSaleEntry = Entry(loyaltyCardControlWindow)
+    newLoyaltyCardSaleEntry.pack()
+
+    def changeLoyaltyCardSale():
+        itemName = itemNameLoyaltyCardEntry.get()
+        newLoyaltyCardSale = newLoyaltyCardSaleEntry.get()
+        requestData = f"loyalty,{itemName},{newLoyaltyCardSale}"
+        clientSocket.send(requestData.encode('utf-8'))
+
+    changeLoyaltyCardSaleBtn = Button(loyaltyCardControlWindow, text="Change Loyalty Card Sale", command=changeLoyaltyCardSale)
+    changeLoyaltyCardSaleBtn.pack()
+
+    resultLabel = Label(loyaltyCardControlWindow, text="")
+    resultLabel.pack()
 
 def displayTableData():
 
@@ -144,8 +184,11 @@ databaseBtn.pack(pady=10)
 priceControlBtn = Button(clientWindow, text = "Open Price Control", command = openPriceControlWindow)
 priceControlBtn.pack(pady=10)
 
-priceControlBtn = Button(clientWindow, text = "Open Inventory Control", command = openInventoryControlWindow)
-priceControlBtn.pack(pady=10)
+inventoryControlBtn = Button(clientWindow, text = "Open Inventory Control", command = openInventoryControlWindow)
+inventoryControlBtn.pack(pady=10)
+
+loyaltyCardControlBtn = Button(clientWindow, text = "Open Loyalty Card Control", command = openLoyaltyCardControlWindow)
+loyaltyCardControlBtn.pack(pady=10)
 
 closeBtn = Button(clientWindow, text="Close", command=closeClient)
 closeBtn.pack()

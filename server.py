@@ -117,7 +117,20 @@ def warningMessage():
             return "No items with low stock."
     except sqlite3.Error as error:
         return f"Error generating warning message: {error}"
-    
+
+def changeloyaltySale(itemName, newLoyaltyCardSale):
+    try:
+        #Execute an SQL update statment to change the items sale price
+        updateQuery = f"UPDATE storeTable SET loyaltyCardOffer = '{newLoyaltyCardSale}' WHERE itemName = '{itemName}'"
+        conn = sqlite3.connect("DE_Store.db")
+        cur = conn.cursor()
+        cur.execute(updateQuery)
+        conn.commit()
+        conn.close()
+        return "Loyalty Card Sale offer updated successfully."
+    except sqlite3.Error as error:
+        return f"Error updating sale offer: {error}"
+
 
 print("Waiting for connection...")
 clientSocket, clientAddress = serverSocket.accept()
@@ -143,6 +156,12 @@ while True:
                 response = changeSale(itemName, newValue)
             elif requestType == "order":
                 response = processOrder(itemName, newValue)
+            elif requestType == "warning":
+                response = warningMessage()
+            elif requestType == "loyalty":
+                response = changeloyaltySale(itemName, newValue)
+            else:
+                response = "Invalid request form"
         else:
             response = "Invalid request form"
 
