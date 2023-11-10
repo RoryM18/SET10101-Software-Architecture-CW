@@ -154,6 +154,15 @@ def openLoyaltyCardControlWindow():
     resultLabel = Label(loyaltyCardControlWindow, text="")
     resultLabel.pack()
 
+def openPortalWindow():
+    global resultLabel
+
+    requestData = "portal"
+    clientSocket.send(requestData.encode('utf-8'))
+
+    resultLabel = Label(clientWindow, text="")
+    resultLabel.pack()
+
 def displayTableData():
 
     conn = sqlite3.connect('De_Store.db')  
@@ -190,8 +199,11 @@ inventoryControlBtn.pack(pady=10)
 loyaltyCardControlBtn = Button(clientWindow, text = "Open Loyalty Card Control", command = openLoyaltyCardControlWindow)
 loyaltyCardControlBtn.pack(pady=10)
 
+openPortalWindowBtn = Button(clientWindow, text = "Open Enabling Portal", command = openPortalWindow)
+openPortalWindowBtn.pack(pady=10)
+
 closeBtn = Button(clientWindow, text="Close", command=closeClient)
-closeBtn.pack()
+closeBtn.pack(pady=10)
 
 #Function to recieve data from server
 

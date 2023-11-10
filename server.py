@@ -1,6 +1,7 @@
 import socket
 import sqlite3
 import json
+import webbrowser
 
 #Create SQLite database connection
 
@@ -131,6 +132,25 @@ def changeloyaltySale(itemName, newLoyaltyCardSale):
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
 
+def openHTMLportal():
+    #HTML content
+    htmlContent = """
+    <html>
+    <head><title>Enabling</title></head>
+    <body>
+        <h1>Welcome to Enabling</h1>
+        <p>This is where the enabling system will be held</p>
+    </body>
+    </html>
+    """
+
+    #Save HTML content to a temporary file
+    with open("enabling.html", "w") as htmlFile:
+        htmlFile.write(htmlContent)
+
+    #Open the HTML file in the default web browser
+    webbrowser.open("enabling.html")
+
 
 print("Waiting for connection...")
 clientSocket, clientAddress = serverSocket.accept()
@@ -150,16 +170,17 @@ while True:
         requestData = data.decode('utf-8').split(',')
         if len(requestData) == 3:
             requestType, itemName, newValue = requestData
+            print("Received data:", requestData)
             if requestType == "price":
                 response = changePrice(itemName, newValue)
             elif requestType == "sale":
                 response = changeSale(itemName, newValue)
             elif requestType == "order":
                 response = processOrder(itemName, newValue)
-            elif requestType == "warning":
-                response = warningMessage()
             elif requestType == "loyalty":
                 response = changeloyaltySale(itemName, newValue)
+            elif requestType == "portal":
+                response = openHTMLportal()
             else:
                 response = "Invalid request form"
         else:
@@ -167,6 +188,19 @@ while True:
 
         # Send the response back to the client
         clientSocket.send(response.encode('utf-8'))
+
+        # Process the client request
+        requestData = data.decode('utf-8').split(',')
+        if len(requestData) == 1:
+            requestType = requestData[0]
+            print("Received data:", requestData)
+            if requestType == "portal":
+                response = openHTMLportal()
+            elif requestType == "warning":
+                response = warningMessage()
+            else:
+                response = "Invalid request form"
+
     except ConnectionResetError:
         print("Client closed connection unexpectedly")
         # Clean up client socket
