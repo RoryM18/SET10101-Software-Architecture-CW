@@ -5,7 +5,7 @@ import webbrowser
 
 #Create SQLite database connection
 
-conn = sqlite3.connect("DE_Store.db")
+conn = sqlite3.connect("Accounting.db")
 
 #Create a cursor tool to navigate the database
 
@@ -14,30 +14,30 @@ cur = conn.cursor()
 #Create the table
 
 table = """
-    CREATE TABLE StoreTable (
-        itemID INTEGER,
-        itemName TEXT,
-        stock INTEGER,
-        price FLOAT,
-        saleOffer FLOAT,
-        loyaltyCardOffer FLOAT,
-        primary key(itemID)
+    CREATE TABLE FinanceTable (
+        reportID INTEGER,
+        month TEXT,
+        numOfSales INTEGER,
+        numOfDeliveries INTEGER,
+        numOfReturns INTEGER,
+        numOfLoyaltyCardsScanned INTEGER,
+        primary key(reportID)
         ) """
 
 #Execture the table
 
 #cur.execute(table)
 
-print("DE-Store Table Created")
+#print("Finance Table Created")
 
-items = ("Screws", 20, 3.99, 0.5, 0.10)
+items = ("May", 923, 577, 65, 860)
 
-de_store_insert = """INSERT INTO StoreTable(itemName, stock, price, saleOffer, loyaltyCardOffer)
+accounting_insert = """INSERT INTO FinanceTable(month, numOfSales, numOfDeliveries, numOfReturns, numOfLoyaltyCardsScanned)
                      VALUES(?,?,?,?,?)"""
 
-#cur.execute(de_store_insert, items)
+#cur.execute(accounting_insert, items)
 
-print("Items inserted into database")
+#print("Items inserted into database")
 
 #Commit table to the database 
 
@@ -152,6 +152,35 @@ def openHTMLportal():
     webbrowser.open("enabling.html")
 
 
+def generateReport():
+    try:
+        #Execute an SQL update statment to change the items sale price
+        selectQuery = "SELECT * FROM FinanceTable"
+        conn = sqlite3.connect("Accounting.db")
+        cur = conn.cursor()
+        cur.execute(selectQuery)
+        data = cur.fetchall()
+
+        reportData = []
+        for row in data:
+            reportData.append({
+                "Month": row[1],
+                "Number of Sales": row[2],
+                "Number of Deliveries": row[3],
+                "Number of Returns": row[4],
+                "Number of Loyalty Cards Scanned": row[5]
+            })
+
+        reportJson = json.dumps(reportData)
+
+        conn.commit()
+        conn.close()
+    
+        return reportJson
+    except sqlite3.Error as error:
+        return f"Error updating sale offer: {error}"
+
+
 print("Waiting for connection...")
 clientSocket, clientAddress = serverSocket.accept()
 print("Accepted connection from {}:{}".format(*clientAddress))
@@ -179,8 +208,6 @@ while True:
                 response = processOrder(itemName, newValue)
             elif requestType == "loyalty":
                 response = changeloyaltySale(itemName, newValue)
-            elif requestType == "portal":
-                response = openHTMLportal()
             else:
                 response = "Invalid request form"
         else:
@@ -198,8 +225,13 @@ while True:
                 response = openHTMLportal()
             elif requestType == "warning":
                 response = warningMessage()
+            elif requestType == "report":
+                response = generateReport()
             else:
                 response = "Invalid request form"
+
+        clientSocket.send(response.encode('utf-8'))
+
 
     except ConnectionResetError:
         print("Client closed connection unexpectedly")

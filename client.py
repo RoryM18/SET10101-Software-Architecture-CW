@@ -5,6 +5,7 @@ import tkinter.messagebox
 import threading
 import time
 import sqlite3
+import json
 
 def connectToServer():
     while True:
@@ -22,6 +23,18 @@ clientSocket = connectToServer()
 
 def closeClient():
     clientWindow.destroy() # Close the client window
+
+#Function to recieve data from server
+
+def recieveDataFromServer():
+    while True:
+        data = clientSocket.recv(1024)
+        if not data:
+            break
+        response = data.decode('utf-8')
+        print(response)
+        if resultLabel:
+            resultLabel.config(text=response) #Update resultLable if it exists
 
 #Create a Tkinter window
 
@@ -82,8 +95,6 @@ def openPriceControlWindow():
 
 def openInventoryControlWindow():
 
-    global resultLabel
-
     inventroyControlWindow = Toplevel(clientWindow)
     inventroyControlWindow.title("Inventory Control")
     inventroyControlWindow.geometry("500x500")
@@ -101,22 +112,33 @@ def openInventoryControlWindow():
     quantityEntry.pack()
 
     def orderOutOfStockItems():
+
+        global resultLabel
+
         itemName = itemNameOrderEntry.get()
         quantity = quantityEntry.get()
         requestData = f"order,{itemName},{quantity}"
         clientSocket.send(requestData.encode('utf-8'))
 
+        resultLabel = Label(inventroyControlWindow, text="")
+        resultLabel.pack()
+
     orderBtn = Button(inventroyControlWindow, text = "Order Stock", command = orderOutOfStockItems)
     orderBtn.pack()
 
-    resultLabel = Label(inventroyControlWindow, text="")
-    resultLabel.pack()
+    
 
     def displayWarningMessage():
+
+        global resultLabel
+
         requestData = "warning"
-        response = clientSocket.send(requestData.encode('utf-8'))
-        if response:
-            tkinter.messagebox.showinfo("Warning Message", response)
+        clientSocket.send(requestData.encode('utf-8'))
+
+        resultLabel = Label(inventroyControlWindow, text="")
+        resultLabel.pack()
+
+        
 
     warningBtn = Button(inventroyControlWindow, text="Show Warning Message", command=displayWarningMessage)
     warningBtn.pack(pady=10)
@@ -163,6 +185,28 @@ def openPortalWindow():
     resultLabel = Label(clientWindow, text="")
     resultLabel.pack()
 
+
+def openFinanceReportWindow():
+
+    
+
+    financeReportWindow = Toplevel(clientWindow)
+    financeReportWindow.title("Finance Report")
+    financeReportWindow.geometry("500x500")
+
+    
+
+    def generateReport():
+        global resultLabel  # Use nonlocal to refer to the outer resultLabel
+        requestData = "report"
+        clientSocket.send(requestData.encode('utf-8'))
+        resultLabel = Label(financeReportWindow, text="")
+        resultLabel.pack(pady=100)
+
+    generateReportBtn = Button(financeReportWindow, text="Generate Report", command=generateReport)
+    generateReportBtn.pack()
+
+
 def displayTableData():
 
     conn = sqlite3.connect('De_Store.db')  
@@ -202,19 +246,13 @@ loyaltyCardControlBtn.pack(pady=10)
 openPortalWindowBtn = Button(clientWindow, text = "Open Enabling Portal", command = openPortalWindow)
 openPortalWindowBtn.pack(pady=10)
 
+openFinanceReportBtn = Button(clientWindow, text = "Open Finance Report", command = openFinanceReportWindow)
+openFinanceReportBtn.pack(pady=10)
+
 closeBtn = Button(clientWindow, text="Close", command=closeClient)
 closeBtn.pack(pady=10)
 
-#Function to recieve data from server
 
-def recieveDataFromServer():
-    while True:
-        data = clientSocket.recv(1024)
-        if not data:
-            break
-        response = data.decode('utf-8')
-        if resultLabel:
-            resultLabel.config(text=response) #Update resultLable if it exists
         
 
 #Start a seperate thread to continuously recieve data from the server
