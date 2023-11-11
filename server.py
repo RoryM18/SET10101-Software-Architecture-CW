@@ -61,6 +61,37 @@ serverSocket.listen(1)
 print("Server is listneing on {}:{}".format(*serverAddress))
 
 
+def displayTableData():
+
+    try:
+        # Connect to the database
+        conn = sqlite3.connect('De_Store.db')  
+        cur = conn.cursor()
+        
+        # Execute the SQL query to fetch data from the database
+        cur.execute("SELECT * FROM StoreTable")  
+        data = cur.fetchall()
+
+        # Prepare the data in a dictionary format
+        table_data = []
+        for row in data:
+            table_data.append({
+                "ID": row[0],
+                "Item Name": row[1],
+                "Stock": row[2],
+                "Price": row[3],
+                "Sale Offer": row[4],
+                "Loyalty Card Offer": row[5]
+            })
+
+        table = json.dumps(table_data)
+
+        conn.commit
+        conn.close()
+        return table
+    except sqlite3.Error as error:
+        print(f"Error fetching data from the database: {error}")
+
 def changePrice(itemName, newPrice):
     try:
         #Execute an SQL update statement to change the items price
@@ -227,6 +258,8 @@ while True:
                 response = warningMessage()
             elif requestType == "report":
                 response = generateReport()
+            elif requestType == "data":
+                response = displayTableData()
             else:
                 response = "Invalid request form"
 

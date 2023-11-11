@@ -11,7 +11,7 @@ def connectToServer():
     while True:
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = ('192.168.0.14', 12345)  # Replace with your server's IP address
+            server_address = ('192.168.0.183', 12345)  # Replace with your server's IP address
             server_socket.connect(server_address)
             print("Connected to the server")
             return server_socket
@@ -188,13 +188,9 @@ def openPortalWindow():
 
 def openFinanceReportWindow():
 
-    
-
     financeReportWindow = Toplevel(clientWindow)
     financeReportWindow.title("Finance Report")
     financeReportWindow.geometry("500x500")
-
-    
 
     def generateReport():
         global resultLabel  # Use nonlocal to refer to the outer resultLabel
@@ -209,26 +205,19 @@ def openFinanceReportWindow():
 
 def displayTableData():
 
-    conn = sqlite3.connect('De_Store.db')  
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM StoreTable")  
-    data = cur.fetchall()    
     dataDisplayWindow = Toplevel(clientWindow)
     dataDisplayWindow.title("Database Data")
     dataDisplayWindow.geometry("1500x400")
-    
-    tree = ttk.Treeview(dataDisplayWindow, columns=("ID", "Item Name", "Stock", "Price", "Sale Offer", "Loyalty Card Iffer"))
-    tree.heading("#1", text="ID")
-    tree.heading("#2", text="Item Name")
-    tree.heading("#3", text="Stock")
-    tree.heading("#4", text="Price")
-    tree.heading("#5", text="Sale Offer")
-    tree.heading("#6", text="Loyalty Card Offer")
-    
-    tree.pack()
 
-    for row in data:
-        tree.insert("", "end", values=row)
+    def generateDatabase():
+        global resultLabel  # Use nonlocal to refer to the outer resultLabel
+        requestData = "data"
+        clientSocket.send(requestData.encode('utf-8'))
+        resultLabel = Label(dataDisplayWindow, text="")
+        resultLabel.pack(pady=100)
+
+    showDatabaseBtn = Button(dataDisplayWindow, text="Display Database", command=generateDatabase)
+    showDatabaseBtn.pack()
 
 
 databaseBtn = Button(clientWindow, text = "View Database", command = displayTableData)
