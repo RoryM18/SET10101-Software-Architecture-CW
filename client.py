@@ -1,11 +1,7 @@
 import socket
 from tkinter import *
-from tkinter import ttk
-import tkinter.messagebox
 import threading
 import time
-import sqlite3
-import json
 
 def connectToServer():
     while True:
