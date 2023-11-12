@@ -86,6 +86,7 @@ def openPriceControlWindow():
     changeSaleBtn = Button(priceControlWindow, text = "Change Sale", command = changeSale)
     changeSaleBtn.pack()
 
+    #Lable to print data received from server
     resultLabel = Label(priceControlWindow, text="")
     resultLabel.pack()
 
@@ -189,7 +190,7 @@ def openFinanceReportWindow():
     financeReportWindow.geometry("500x500")
 
     def generateReport():
-        global resultLabel  # Use nonlocal to refer to the outer resultLabel
+        global resultLabel  
         requestData = "report"
         clientSocket.send(requestData.encode('utf-8'))
         resultLabel = Label(financeReportWindow, text="")
@@ -206,7 +207,7 @@ def displayTableData():
     dataDisplayWindow.geometry("1500x400")
 
     def generateDatabase():
-        global resultLabel  # Use nonlocal to refer to the outer resultLabel
+        global resultLabel  
         requestData = "data"
         clientSocket.send(requestData.encode('utf-8'))
         resultLabel = Label(dataDisplayWindow, text="")

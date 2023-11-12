@@ -30,6 +30,8 @@ table = """
 
 #print("Finance Table Created")
 
+#Insert Items into a Database
+
 items = ("May", 923, 577, 65, 860)
 
 accounting_insert = """INSERT INTO FinanceTable(month, numOfSales, numOfDeliveries, numOfReturns, numOfLoyaltyCardsScanned)
@@ -68,7 +70,7 @@ def displayTableData():
         conn = sqlite3.connect('De_Store.db')  
         cur = conn.cursor()
         
-        # Execute the SQL query to fetch data from the database
+        # Execute the SQL query to fetch data from the DE Store database
         cur.execute("SELECT * FROM StoreTable")  
         data = cur.fetchall()
 
@@ -86,9 +88,12 @@ def displayTableData():
 
         table = json.dumps(table_data)
 
+        #Commit SQL Query and close connection to database
         conn.commit
         conn.close()
+        #Return formatted table
         return table
+    #Error handling
     except sqlite3.Error as error:
         print(f"Error fetching data from the database: {error}")
 
@@ -102,6 +107,7 @@ def changePrice(itemName, newPrice):
         conn.commit()
         conn.close()
         return "Price updated successfully."
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error updating price: {error}"
 
@@ -115,6 +121,7 @@ def changeSale(itemName, newSale):
         conn.commit()
         conn.close()
         return "Sale offer updated successfully."
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
     
@@ -127,6 +134,7 @@ def processOrder(itemName, quantity):
         conn.commit()
         conn.close()
         return f"Ordered {quantity} {itemName} successfully."
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error processing order: {error}"
     
@@ -147,6 +155,7 @@ def warningMessage():
             return f"Order more of the following items: {items_list}"
         else:
             return "No items with low stock."
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error generating warning message: {error}"
 
@@ -160,6 +169,7 @@ def changeloyaltySale(itemName, newLoyaltyCardSale):
         conn.commit()
         conn.close()
         return "Loyalty Card Sale offer updated successfully."
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
 
@@ -208,12 +218,15 @@ def generateReport():
         conn.close()
     
         return reportJson
+    #Error Handling
     except sqlite3.Error as error:
         return f"Error updating sale offer: {error}"
 
 
 print("Waiting for connection...")
+#Connect the client side to the server
 clientSocket, clientAddress = serverSocket.accept()
+#Prints the server IP Address and client port number
 print("Accepted connection from {}:{}".format(*clientAddress))
 
 while True:
@@ -226,7 +239,7 @@ while True:
             clientSocket.close()
             break
 
-        # Process the client request
+        # Process the client request When inserting new data from client to server
         requestData = data.decode('utf-8').split(',')
         if len(requestData) == 3:
             requestType, itemName, newValue = requestData
@@ -247,7 +260,7 @@ while True:
         # Send the response back to the client
         clientSocket.send(response.encode('utf-8'))
 
-        # Process the client request
+        # Process the client request When displaying data from the server to client window
         requestData = data.decode('utf-8').split(',')
         if len(requestData) == 1:
             requestType = requestData[0]
@@ -267,7 +280,8 @@ while True:
 
 
     except ConnectionResetError:
-        print("Client closed connection unexpectedly")
+        print("Client closed connection")
+        clientSocket.close()
         # Clean up client socket
         break
 
