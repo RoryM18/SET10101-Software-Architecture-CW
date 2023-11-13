@@ -6,11 +6,12 @@ import time
 def connectToServer():
     while True:
         try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = ('192.168.0.183', 12345)  # Replace with your server's IP address
-            server_socket.connect(server_address)
+            serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            localIP = socket.gethostbyname(socket.gethostname()) #Automatically get local ip address of machine 
+            serverAddress = (localIP, 12345) 
+            serverSocket.connect(serverAddress)
             print("Connected to the server")
-            return server_socket
+            return serverSocket
         except ConnectionRefusedError:
             print("Connection refused. Retrying in 5 seconds...")
             time.sleep(5)
