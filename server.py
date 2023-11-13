@@ -34,10 +34,10 @@ table = """
 
 items = ("May", 923, 577, 65, 860)
 
-accounting_insert = """INSERT INTO FinanceTable(month, numOfSales, numOfDeliveries, numOfReturns, numOfLoyaltyCardsScanned)
+accountingInsert = """INSERT INTO FinanceTable(month, numOfSales, numOfDeliveries, numOfReturns, numOfLoyaltyCardsScanned)
                      VALUES(?,?,?,?,?)"""
 
-#cur.execute(accounting_insert, items)
+#cur.execute(accountingInsert, items)
 
 #print("Items inserted into database")
 
@@ -75,9 +75,9 @@ def displayTableData():
         data = cur.fetchall()
 
         # Prepare the data in a dictionary format
-        table_data = []
+        tableData = []
         for row in data:
-            table_data.append({
+            tableData.append({
                 "ID": row[0],
                 "Item Name": row[1],
                 "Stock": row[2],
@@ -86,7 +86,7 @@ def displayTableData():
                 "Loyalty Card Offer": row[5]
             })
 
-        table = json.dumps(table_data)
+        table = json.dumps(tableData)
 
         #Commit SQL Query and close connection to database
         conn.commit
@@ -147,12 +147,12 @@ def warningMessage():
         cur.execute("SELECT itemName FROM StoreTable WHERE stock < 10")
         
         # Fetch all the results
-        low_stock_items = cur.fetchall()
+        lowStockItems = cur.fetchall()
         
-        if low_stock_items:
+        if lowStockItems:
             # If there are items with low stock, create a warning message
-            items_list = ', '.join(item[0] for item in low_stock_items)
-            return f"Order more of the following items: {items_list}"
+            itemList = ', '.join(item[0] for item in lowStockItems)
+            return f"Order more of the following items: {itemList}"
         else:
             return "No items with low stock."
     #Error Handling
@@ -174,23 +174,28 @@ def changeloyaltySale(itemName, newLoyaltyCardSale):
         return f"Error updating sale offer: {error}"
 
 def openHTMLportal():
-    #HTML content
-    htmlContent = """
-    <html>
-    <head><title>Enabling</title></head>
-    <body>
-        <h1>Welcome to Enabling</h1>
-        <p>This is where the enabling system will be held</p>
-    </body>
-    </html>
-    """
+    try:
+        #HTML content
+        htmlContent = """
+        <html>
+        <head><title>Enabling</title></head>
+        <body>
+            <h1>Welcome to Enabling</h1>
+            <p>This is where the enabling system will be held</p>
+        </body>
+        </html>
+        """
 
-    #Save HTML content to a temporary file
-    with open("enabling.html", "w") as htmlFile:
-        htmlFile.write(htmlContent)
+        #Save HTML content to a temporary file
+        with open("enabling.html", "w") as htmlFile:
+            htmlFile.write(htmlContent)
 
-    #Open the HTML file in the default web browser
-    webbrowser.open("enabling.html")
+        #Open the HTML file in the default web browser
+        webpage = webbrowser.open("enabling.html")
+
+        return f"Opening webpage {webpage}"
+    except Exception as error:
+        return f"webpage failed {error}"
 
 
 def generateReport():
